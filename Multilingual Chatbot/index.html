@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Langflow Chat</title>
+  <script>
+    async function runFlow(event) {
+      event.preventDefault();
+
+      // Get input value from the form
+      const inputValue = document.getElementById("inputValue").value;
+
+      // Prepare the POST request payload
+      const payload = {
+        inputValue: inputValue,
+        inputType: "chat",
+        outputType: "chat",
+        stream: false
+      };
+
+      try {
+        // Send the POST request to the backend
+        const response = await fetch("http://localhost:3001/run-flow", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!response.ok) {
+          throw new Error(`Server error: ${response.status}`);
+        }
+
+        // Parse the JSON response
+        const data = await response.json();
+
+        // Extract the message text from the response
+        const message = data?.data?.outputs?.[0]?.outputs?.[0]?.results?.message?.data?.text;
+
+        // Display only the message on the page
+        if (message) {
+          document.getElementById("output").textContent = message;
+        } else {
+          document.getElementById("output").textContent = "No message found in the response.";
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        document.getElementById("output").textContent = `Error: ${error.message}`;
+      }
+    }
+  </script>
+</head>
+<body>
+  <h1>Chat with Langflow</h1>
+
+  <form id="flowForm" onsubmit="runFlow(event)">
+    <label for="inputValue">Your Input:</label>
+    <input type="text" id="inputValue" name="inputValue" required>
+    <button type="submit">Send</button>
+  </form>
+
+  <h2>Response:</h2>
+  <pre id="output">No response yet...</pre>
+</body>
+</html>

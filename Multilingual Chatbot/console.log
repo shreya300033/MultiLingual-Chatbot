@@ -1,0 +1,20 @@
+async function runFlow(inputValue) {
+    try {
+        const response = await fetch("http://localhost:3001/run-flow", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ inputValue }),
+        });
+        console.log("Request Sent:", inputValue); // Log input
+        const data = await response.json();
+        console.log("Response Received:", data); // Log response
+        if (response.ok) {
+            document.getElementById("response").innerText = data.data.outputs[0].outputs[0].results.message.text;
+        } else {
+            document.getElementById("response").innerText = `Error: ${data.error}`;
+        }
+    } catch (error) {
+        console.error("Fetch Error:", error);
+        document.getElementById("response").innerText = `Error: ${error.message}`;
+    }
+}
